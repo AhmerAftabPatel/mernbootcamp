@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from "react";
+
 import Base from "../core/Base";
 import { Link } from "react-router-dom";
-import { isAuthenticated } from "../auth/helper";
+import { isAutheticated } from "../auth/helper";
 import { getProducts, deleteProduct } from "./helper/adminapicall";
 
 const ManageProducts = () => {
   const [products, setProducts] = useState([]);
-  const { user, token } = isAuthenticated();
+  console.log(products);
 
+  const { user, token } = isAutheticated();
+  console.log(user);
   const preload = () => {
     getProducts().then((data) => {
       if (data.error) {
@@ -24,6 +27,8 @@ const ManageProducts = () => {
 
   const deleteThisProduct = (productId) => {
     deleteProduct(productId, user._id, token).then((data) => {
+      console.log("Token:", token);
+      console.log("User:", user._id);
       if (data.error) {
         console.log(data.error);
       } else {
@@ -33,24 +38,26 @@ const ManageProducts = () => {
   };
 
   return (
-    <Base title="Welcome admin" description="Manage products here">
+    <Base title={`Welcome ${user.name}`} description="Manage products here">
       <h2 className="mb-4">All products:</h2>
-      <Link className="btn btn-info" to={`/admin/dashboard`}>
+      <Link className="btn btn-outline-warning" to={`/admin/dashboard`}>
         <span className="">Admin Home</span>
       </Link>
       <div className="row">
         <div className="col-12">
-          <h2 className="text-center my-3">Products List</h2>
+          <h2 className="text-center text-white my-3">
+            Total {products.length} products
+          </h2>
 
           {products.map((product, index) => {
             return (
               <div key={index} className="row text-center mb-2 ">
                 <div className="col-4">
-                  <h3 className="text-left">{product.name}</h3>
+                  <h3 className="text-white text-left">{product.name}</h3>
                 </div>
                 <div className="col-4">
                   <Link
-                    className="btn btn-success"
+                    className="btn btn-outline-success"
                     to={`/admin/product/update/${product._id}`}
                   >
                     <span className="">Update</span>
@@ -61,7 +68,7 @@ const ManageProducts = () => {
                     onClick={() => {
                       deleteThisProduct(product._id);
                     }}
-                    className="btn btn-danger"
+                    className="btn btn-outline-danger"
                   >
                     Delete
                   </button>

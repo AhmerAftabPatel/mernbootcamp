@@ -1,0 +1,12 @@
+$primaryColor: #343a40;
+
+.btn,
+.jumbotron,
+.nav :hover {
+  border-radius: 0px;
+}
+
+body {
+  background: $primaryColor;
+}
+

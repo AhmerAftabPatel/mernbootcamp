@@ -1,10 +1,10 @@
-import React, { useState } from "react";
-import { createCategory } from "./helper/adminapicall";
+import React, { useState, useEffect } from "react";
+import { getaCategory, updateCategory } from "./helper/adminapicall";
 import { isAutheticated } from "../auth/helper";
 import Base from "../core/Base";
 import { Link } from "react-router-dom";
 
-const AddCategory = () => {
+const UpdateCategory = ({ match }) => {
   const [name, setName] = useState("");
   const [error, setError] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -16,14 +16,36 @@ const AddCategory = () => {
     setName(event.target.value);
   };
 
+  console.log("NAME : ", { name });
+
+  const preload = (categoryId) => {
+    getaCategory(categoryId).then((data) => {
+      if (data.error) {
+        setError({ error: data.error });
+      } else {
+        setName(data.name);
+      }
+    });
+  };
+
+  useEffect(() => {
+    preload(match.params.categoryId);
+  }, []);
+
   const onSubmit = (event) => {
+    event.preventDefault();
     setError("");
     setSuccess(false);
 
     //backend request
-    createCategory(user._id, token, { name }).then((data) => {
+    updateCategory(
+      match.params.categoryId,
+      user._id,
+      token,
+      JSON.stringify({ name })
+    ).then((data) => {
       if (data.error) {
-        setError(true);
+        setError(data.error);
       } else {
         setError(false);
         setSuccess(true);
@@ -36,22 +58,23 @@ const AddCategory = () => {
     if (success) {
       return (
         <h4 className="text-success text-center">
-          Category has not been created.
+          Category has been updated successfully
         </h4>
       );
     }
   };
   const errorMessage = () => {
+    console.log(error);
     if (error) {
       return (
         <h4 className="text-danger text-center">
-          Category has been created successfully
+          Category has not been updated.
         </h4>
       );
     }
   };
 
-  const addCategoryForm = () => {
+  const updateCategoryForm = () => {
     return (
       <form action="">
         <div className="form-group p-3">
@@ -77,16 +100,16 @@ const AddCategory = () => {
   };
 
   return (
-    <Base title="Create a category" className="container bg-success p-4">
+    <Base title="Update a category" className="container bg-success p-4">
       <div className="row bg-light rounded">
         <div className="col-md-8 offset-md-2">
           {successMessage()}
           {errorMessage()}
-          {addCategoryForm()}
+          {updateCategoryForm()}
         </div>
       </div>
     </Base>
   );
 };
 
-export default AddCategory;
+export default UpdateCategory;

@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from "react";
 import Base from "../core/Base";
 import { Link } from "react-router-dom";
-import { getAllCategories, createProduct } from "./helper/adminapicall";
+import {
+  getAllCategories,
+  getProduct,
+  updateProduct,
+} from "./helper/adminapicall";
 import { isAutheticated } from "../auth/helper/index";
 
-const AddProduct = () => {
+const UpdateProduct = ({ match }) => {
   const { user, token } = isAutheticated();
 
   const [values, setValues] = useState({
@@ -32,40 +36,65 @@ const AddProduct = () => {
     formData,
   } = values;
 
-  const preload = () => {
-    getAllCategories().then((data) => {
-      //console.log(data);
+  const preload = (productId) => {
+    getProduct(productId).then((data) => {
       if (data.error) {
         setValues({ ...values, error: data.error });
       } else {
-        setValues({ ...values, categories: data, formData: new FormData() });
+        preloadCategories();
+        setValues({
+          ...values,
+          name: data.name,
+          description: data.description,
+          price: data.price,
+          category: data.category,
+          stock: data.stock,
+          formData: new FormData(),
+        });
+      }
+    });
+  };
+
+  const preloadCategories = () => {
+    getAllCategories().then((data) => {
+      if (data.error) {
+        setValues({ ...values, error: data.error });
+      } else {
+        setValues({
+          categories: data,
+          formData: new FormData(),
+        });
       }
     });
   };
 
   useEffect(() => {
-    preload();
+    preload(match.params.productId);
   }, []);
 
+  //TODO: work on it
   const onSubmit = (event) => {
     event.preventDefault();
     setValues({ ...values, error: "", loading: true });
-    createProduct(user._id, token, formData).then((data) => {
-      if (data.error) {
-        setValues({ ...values, error: data.error });
-      } else {
-        setValues({
-          ...values,
-          name: "",
-          description: "",
-          price: "",
-          photo: "",
-          stock: "",
-          loading: false,
-          createdProduct: data.name,
-        });
+
+    updateProduct(match.params.productId, user._id, token, formData).then(
+      (data) => {
+        if (data.error) {
+          setValues({ ...values, error: data.error });
+        } else {
+          setValues({
+            ...values,
+            name: "",
+            description: "",
+            price: "",
+            photo: "",
+            stock: "",
+            loading: false,
+            createdProduct: data.name,
+          });
+        }
       }
-    });
+    );
   };
 
   const handleChange = (name) => (event) => {
@@ -79,7 +108,7 @@ const AddProduct = () => {
       className="alert alert-success mt-3"
       style={{ display: createdProduct ? "" : "none" }}
     >
-      <h4>{createdProduct} created successfully</h4>
+      <h4>{createdProduct} updated successfully</h4>
     </div>
   );
 
@@ -154,17 +183,17 @@ const AddProduct = () => {
         onClick={onSubmit}
         className="btn btn-outline-success mb-3"
       >
-        Create Product
+        Update Product
       </button>
-      <Link to="/admin/dashboard" className="btn btn-outline-warning mb-3 mx-5">
-        Admin Dashboard
+      <Link to="/admin/dashboard" className="btn btn-outline-warning mx-4 mb-3">
+        Admin Home
       </Link>
     </form>
   );
 
   return (
-    <Base title="Add a product here!">
-      <div className="row bg-dark text-white">
+    <Base title="Update a product here!">
+      <div className="row bg-dark text-white rounded">
         <div className="col-md-8 offset-md-2">
           {successMessage()}
           {createProductForm()}
@@ -174,4 +203,4 @@ const AddProduct = () => {
   );
 };
 
-export default AddProduct;
+export default UpdateProduct;
