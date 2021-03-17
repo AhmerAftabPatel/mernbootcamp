@@ -1,1 +1,1 @@
-export const API = "https://mernbootcampbackend.herokuapp.com/api";
+export const API="https://mernbootcampbackend.herokuapp.com/api";

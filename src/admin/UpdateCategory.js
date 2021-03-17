@@ -1,29 +1,32 @@
 import React, { useState, useEffect } from "react";
-import { getaCategory, updateCategory } from "./helper/adminapicall";
-import { isAutheticated } from "../auth/helper";
 import Base from "../core/Base";
 import { Link } from "react-router-dom";
+import { getaCategory, updateaCateogry } from "./helper/adminapicall";
+import { isAuthenticated } from "../auth/helper";
 
 const UpdateCategory = ({ match }) => {
-  const [name, setName] = useState("");
-  const [error, setError] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const { user, token } = isAuthenticated();
 
-  const { user, token } = isAutheticated();
+  const [values, setValues] = useState({
+    name: "",
+    error: "",
+    createdCategory: "",
+    formData: "",
+  });
 
-  const handleChange = (event) => {
-    setError("");
-    setName(event.target.value);
-  };
-
-  console.log("NAME : ", { name });
+  const { name, error, createdCategory, formData } = values;
 
   const preload = (categoryId) => {
     getaCategory(categoryId).then((data) => {
+      console.log(data);
       if (data.error) {
-        setError({ error: data.error });
+        setValues({ ...values, error: data.error });
       } else {
-        setName(data.name);
+        setValues({
+          ...values,
+          name: data.name,
+          formData: new FormData(),
+        });
       }
     });
   };
@@ -34,77 +37,75 @@ const UpdateCategory = ({ match }) => {
 
   const onSubmit = (event) => {
     event.preventDefault();
-    setError("");
-    setSuccess(false);
 
-    //backend request
-    updateCategory(
-      match.params.categoryId,
-      user._id,
-      token,
-      JSON.stringify({ name })
-    ).then((data) => {
-      if (data.error) {
-        setError(data.error);
-      } else {
-        setError(false);
-        setSuccess(true);
-        setName("");
+    setValues({ ...values, error: "" });
+    updateaCateogry(match.params.categoryId, user._id, token, { name }).then(
+      (data) => {
+        if (data.error) {
+          setValues({ ...values, error: data.errors });
+        } else {
+          setValues({
+            ...values,
+            name: "",
+            createdCategory: data.name,
+          });
+        }
       }
-    });
-  };
-
-  const successMessage = () => {
-    if (success) {
-      return (
-        <h4 className="text-success text-center">
-          Category has been updated successfully
-        </h4>
-      );
-    }
-  };
-  const errorMessage = () => {
-    console.log(error);
-    if (error) {
-      return (
-        <h4 className="text-danger text-center">
-          Category has not been updated.
-        </h4>
-      );
-    }
-  };
-
-  const updateCategoryForm = () => {
-    return (
-      <form action="">
-        <div className="form-group p-3">
-          <p className="lead">Enter the category</p>
-          <input
-            type="text"
-            className="form-control my-4"
-            autoFocus
-            required
-            placeholder="Eg: Summer"
-            value={name}
-            onChange={handleChange}
-          />
-          <button className="btn btn-outline-success" onClick={onSubmit}>
-            Submit
-          </button>
-          <Link className="btn btn-outline-warning mx-4" to="/admin/dashboard">
-            Go to Dashboard
-          </Link>
-        </div>
-      </form>
     );
   };
 
+  const handleChange = (name) => (event) => {
+    const value = event.target.value;
+    formData.set(name, value);
+    setValues({ ...values, [name]: value });
+  };
+
+  const successMessage = () => (
+    <div
+      className="alert alert-success mt-3"
+      style={{ display: createdCategory ? "" : "none" }}
+    >
+      <h4>{createdCategory} Updated successfully</h4>
+    </div>
+  );
+
+  const updateCategoryForm = () => (
+    <form className="py-4">
+      <div className="form-group ">
+        <label>Category</label>
+        <input
+          className="form-control"
+          onChange={handleChange("name")}
+          value={name}
+          placeholder="Enter category name"
+          required
+          autoFocus
+        />
+      </div>
+      <div className="form-group">
+        <button
+          type="submit"
+          onClick={onSubmit}
+          className="btn btn-outline-primary"
+        >
+          Update Category
+        </button>
+      </div>
+    </form>
+  );
+
   return (
-    <Base title="Update a category" className="container bg-success p-4">
-      <div className="row bg-light rounded">
-        <div className="col-md-8 offset-md-2">
+    <Base
+      title="Add a product here!"
+      description="Welcome to product updation section"
+      className="container p-4 mb-5 bg-white box_shadow"
+    >
+      <Link to="/admin/dashboard" className="btn btn-md btn-dark mb-3">
+        Admin Home
+      </Link>
+      <div className="row">
+        <div className="col-md-8 offset-md-2 rounded">
           {successMessage()}
-          {errorMessage()}
           {updateCategoryForm()}
         </div>
       </div>

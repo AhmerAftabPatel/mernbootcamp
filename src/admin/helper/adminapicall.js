@@ -17,16 +17,10 @@ export const createCategory = (userId, token, category) => {
     .catch((err) => console.log(err));
 };
 
-//Update Category
-export const updateCategory = (categoryId, userId, token, category) => {
-  return fetch(`${API}/category/${categoryId}/${userId}`, {
-    method: "PUT",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: category,
+//get all categories
+export const getCategories = () => {
+  return fetch(`${API}/categories`, {
+    method: "GET",
   })
     .then((response) => {
       return response.json();
@@ -35,7 +29,6 @@ export const updateCategory = (categoryId, userId, token, category) => {
 };
 
 //get a category
-
 export const getaCategory = (categoryId) => {
   return fetch(`${API}/category/${categoryId}`, {
     method: "GET",
@@ -46,10 +39,16 @@ export const getaCategory = (categoryId) => {
     .catch((err) => console.log(err));
 };
 
-//get all categories
-export const getAllCategories = () => {
-  return fetch(`${API}/categories`, {
-    method: "GET",
+//update a category
+export const updateaCateogry = (categoryId, userId, token, category) => {
+  return fetch(`${API}/category/${categoryId}/${userId}`, {
+    method: "PUT",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(category),
   })
     .then((response) => {
       return response.json();
@@ -57,9 +56,9 @@ export const getAllCategories = () => {
     .catch((err) => console.log(err));
 };
 
-//Delete Category
-export const deleteCategory = (productId, userId, token) => {
-  return fetch(`${API}/category/${productId}/${userId}`, {
+//delete Category
+export const deleteCategory = (categoryId, userId, token) => {
+  return fetch(`${API}/category/${categoryId}/${userId}`, {
     method: "DELETE",
     headers: {
       Accept: "application/json",
@@ -118,7 +117,6 @@ export const deleteProduct = (productId, userId, token) => {
 };
 
 //get a product
-
 export const getProduct = (productId) => {
   return fetch(`${API}/product/${productId}`, {
     method: "GET",
@@ -130,7 +128,6 @@ export const getProduct = (productId) => {
 };
 
 //update a product
-
 export const updateProduct = (productId, userId, token, product) => {
   return fetch(`${API}/product/${productId}/${userId}`, {
     method: "PUT",

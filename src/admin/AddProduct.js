@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import Base from "../core/Base";
 import { Link } from "react-router-dom";
-import { getAllCategories, createProduct } from "./helper/adminapicall";
-import { isAutheticated } from "../auth/helper/index";
+import { getCategories, createProduct } from "./helper/adminapicall";
+import { isAuthenticated } from "../auth/helper";
 
 const AddProduct = () => {
-  const { user, token } = isAutheticated();
+  const { user, token } = isAuthenticated();
 
   const [values, setValues] = useState({
     name: "",
@@ -28,13 +28,17 @@ const AddProduct = () => {
     price,
     stock,
     categories,
+    category,
+    loading,
+    error,
     createdProduct,
+    getaRedirect,
     formData,
   } = values;
 
   const preload = () => {
-    getAllCategories().then((data) => {
-      //console.log(data);
+    getCategories().then((data) => {
+      // console.log(data);
       if (data.error) {
         setValues({ ...values, error: data.error });
       } else {
@@ -45,6 +49,7 @@ const AddProduct = () => {
 
   useEffect(() => {
     preload();
+    console.log("in useEffect");
   }, []);
 
   const onSubmit = (event) => {
@@ -52,7 +57,7 @@ const AddProduct = () => {
     setValues({ ...values, error: "", loading: true });
     createProduct(user._id, token, formData).then((data) => {
       if (data.error) {
-        setValues({ ...values, error: data.error });
+        setValues({ ...values, error: data.errors });
       } else {
         setValues({
           ...values,
@@ -82,12 +87,11 @@ const AddProduct = () => {
       <h4>{createdProduct} created successfully</h4>
     </div>
   );
-
   const createProductForm = () => (
     <form>
-      <span>Post photo</span>
+      <label style={{ color: "#000" }}>Post photo</label>
       <div className="form-group">
-        <label className="btn btn-block btn-success">
+        <label className="btn btn-block bg_gradiant_btn">
           <input
             onChange={handleChange("photo")}
             type="file"
@@ -99,8 +103,8 @@ const AddProduct = () => {
       </div>
       <div className="form-group">
         <input
+          type="text"
           onChange={handleChange("name")}
-          name="photo"
           className="form-control"
           placeholder="Name"
           value={name}
@@ -109,7 +113,6 @@ const AddProduct = () => {
       <div className="form-group">
         <textarea
           onChange={handleChange("description")}
-          name="photo"
           className="form-control"
           placeholder="Description"
           value={description}
@@ -141,8 +144,8 @@ const AddProduct = () => {
       </div>
       <div className="form-group">
         <input
-          onChange={handleChange("stock")}
           type="number"
+          onChange={handleChange("stock")}
           className="form-control"
           placeholder="Stock"
           value={stock}
@@ -156,18 +159,29 @@ const AddProduct = () => {
       >
         Create Product
       </button>
-      <Link to="/admin/dashboard" className="btn btn-outline-warning mb-3 mx-5">
-        Admin Dashboard
-      </Link>
     </form>
   );
 
   return (
-    <Base title="Add a product here!">
-      <div className="row bg-dark text-white">
-        <div className="col-md-8 offset-md-2">
-          {successMessage()}
-          {createProductForm()}
+    <Base
+      title="Add a product here!"
+      description="Welcome to product creation section"
+      className="container pb-5"
+    >
+      <div className="box_shadow bg-white">
+        <div className="card_title px-4">
+          <Link
+            to="/admin/dashboard"
+            className="btn btn-md bg_gradiant_btn my-3"
+          >
+            Admin Home
+          </Link>
+        </div>
+        <div className="row text-white rounded">
+          <div className="col-md-8 offset-md-2">
+            {successMessage()}
+            {createProductForm()}
+          </div>
         </div>
       </div>
     </Base>

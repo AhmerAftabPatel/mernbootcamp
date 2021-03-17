@@ -1,15 +1,25 @@
 import React, { useState } from "react";
-import { createCategory } from "./helper/adminapicall";
-import { isAutheticated } from "../auth/helper";
 import Base from "../core/Base";
+import { isAuthenticated } from "../auth/helper";
 import { Link } from "react-router-dom";
+import { createCategory } from "./helper/adminapicall";
 
 const AddCategory = () => {
-  const [name, setName] = useState("");
+  const [name, setName] = useState();
   const [error, setError] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  const { user, token } = isAutheticated();
+  const { user, token } = isAuthenticated();
+
+  const goBack = () => {
+    return (
+      <div className="mt-5">
+        <Link className="btn btn-sm btn-success mb-3" to="/admin/dashboard">
+          Admin Home
+        </Link>
+      </div>
+    );
+  };
 
   const handleChange = (event) => {
     setError("");
@@ -17,15 +27,16 @@ const AddCategory = () => {
   };
 
   const onSubmit = (event) => {
+    event.preventDefault();
     setError("");
     setSuccess(false);
 
-    //backend request
+    //backend requerst fired
     createCategory(user._id, token, { name }).then((data) => {
       if (data.error) {
         setError(true);
       } else {
-        setError(false);
+        setError("");
         setSuccess(true);
         setName("");
       }
@@ -34,55 +45,48 @@ const AddCategory = () => {
 
   const successMessage = () => {
     if (success) {
-      return (
-        <h4 className="text-success text-center">
-          Category has not been created.
-        </h4>
-      );
-    }
-  };
-  const errorMessage = () => {
-    if (error) {
-      return (
-        <h4 className="text-danger text-center">
-          Category has been created successfully
-        </h4>
-      );
+      return <h4 className="text-success">Category created Successfully</h4>;
     }
   };
 
-  const addCategoryForm = () => {
-    return (
-      <form action="">
-        <div className="form-group p-3">
-          <p className="lead">Enter the category</p>
-          <input
-            type="text"
-            className="form-control my-4"
-            autoFocus
-            required
-            placeholder="Eg: Summer"
-            value={name}
-            onChange={handleChange}
-          />
-          <button className="btn btn-outline-success" onClick={onSubmit}>
-            Submit
-          </button>
-          <Link className="btn btn-outline-warning mx-4" to="/admin/dashboard">
-            Go to Dashboard
-          </Link>
-        </div>
-      </form>
-    );
+  const warningMessage = () => {
+    if (error) {
+      return <h4 className="text-success">Failed to created category</h4>;
+    }
   };
+
+  const myCategoryForm = () => (
+    <form>
+      <div className="form-group">
+        <p className="lead">Enter the category</p>
+        <input
+          type="text"
+          className="form-control my-3"
+          onChange={handleChange}
+          value={name}
+          autoFocus
+          required
+          placeholder="For Ex. Summer"
+        />
+        <button className="btn btn-outline-info" onClick={onSubmit}>
+          Crate Category
+        </button>
+      </div>
+    </form>
+  );
 
   return (
-    <Base title="Create a category" className="container bg-success p-4">
-      <div className="row bg-light rounded">
-        <div className="col-md-8 offset-md-2">
+    <Base
+      title="Create a category here"
+      description="Add a new category fro new thsirts"
+      className="container"
+    >
+      <div className="row">
+        <div className="col-md-8 offset-md-2 mb-5 bg-white box_shadow rounded p-3">
           {successMessage()}
-          {errorMessage()}
-          {addCategoryForm()}
+          {warningMessage()}
+          {myCategoryForm()}
+          {goBack()}
         </div>
       </div>
     </Base>

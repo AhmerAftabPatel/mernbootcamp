@@ -1,69 +1,82 @@
 import React from "react";
-import { Link } from "react-router-dom";
-import { isAutheticated } from "../auth/helper";
 import Base from "../core/Base";
+import { isAuthenticated } from "../auth/helper/index";
+import { Link } from "react-router-dom";
 
-const AdminDashboard = () => {
+const AdminDashBoard = () => {
   const {
-    user: { name, email },
-  } = isAutheticated();
+    user: { name, email, role },
+  } = isAuthenticated();
 
-  const adminLeftSide = () => (
-    <div className="card">
-      <h4 className="card-header bg-dark text-white">Admin Navigation</h4>
-      <ul className="list-group">
-        <li className="list-group-item">
-          <Link to="/admin/create/category" className="nav-link text-info">
-            Create Categories
-          </Link>
-        </li>
-        <li className="list-group-item">
-          <Link to="/admin/categories" className="nav-link text-info">
-            Manage Categories
-          </Link>
-        </li>
-        <li className="list-group-item">
-          <Link to="/admin/create/product" className="nav-link text-info">
-            Create Products
-          </Link>
-        </li>
-        <li className="list-group-item">
-          <Link to="/admin/products" className="nav-link text-info">
-            Manage Products
-          </Link>
-        </li>
+  const adminLeftSide = () => {
+    return (
+      <div className="card border-0 box_shadow">
+        <h4 className="card-header card_title">Admin Navigation</h4>
+        <ul className="list-group">
+          <li className="list-group-item">
+            <Link to="/admin/create/category" className="nav-link text-sucess">
+              Create Categories
+            </Link>
+          </li>
+          <li className="list-group-item">
+            <Link to="/admin/categories" className="nav-link text-sucess">
+              Manage Categories
+            </Link>
+          </li>
+          <li className="list-group-item">
+            <Link to="/admin/create/product" className="nav-link text-sucess">
+              Create Products
+            </Link>
+          </li>
+          <li className="list-group-item">
+            <Link to="/admin/products" className="nav-link text-sucess">
+              Manage Products
+            </Link>
+          </li>
+          <li className="list-group-item">
+            <Link to="/admin/orders" className="nav-link text-sucess">
+              Manage Orders
+            </Link>
+          </li>
+        </ul>
+      </div>
+    );
+  };
 
-        <li className="list-group-item">
-          <Link to="/admin/orders" className="nav-link text-info">
-            Manage Orders
-          </Link>
-        </li>
-      </ul>
-    </div>
-  );
-  const adminRightSide = () => (
-    <div className="card">
-      <h4 className="card-header">Admin Information</h4>
-      <ul className="list-group">
-        <li className="list-group-item">
-          <span className="badge badge-success mr-2">Name</span>
-          {name}
-        </li>
-        <li className="list-group-item">
-          <span className="badge badge-success mr-2">Email</span>
-          {email}
-        </li>
-      </ul>
-    </div>
-  );
+  const adminRightSide = () => {
+    return (
+      <div className="card mb-4 border-0 box_shadow">
+        <h4 className="card-header card_title">Admin Info</h4>
+        <ul className="list-group">
+          <li className="list-group-item">
+            <span className="badge badge-success mr-2">Name:</span>
+            {name}
+          </li>
+          <li className="list-group-item">
+            <span className="badge badge-success mr-2">Email:</span>
+            {email}
+          </li>
+          <li className="list-group-item">
+            <span className="badge badge-danger">Admin Area</span>
+          </li>
+        </ul>
+      </div>
+    );
+  };
+
   return (
-    <Base title={`${name}'s Dashboard`} className="container bg-success p-4">
-      <div className="row">
+    <Base
+      title="Welcome to Admin Area"
+      description="Manage all of your products here"
+      className="container-fluid"
+    >
+      <div className="row pb-5">
         <div className="col-3">{adminLeftSide()}</div>
+
         <div className="col-9">{adminRightSide()}</div>
       </div>
     </Base>
   );
 };
 
-export default AdminDashboard;
+export default AdminDashBoard;

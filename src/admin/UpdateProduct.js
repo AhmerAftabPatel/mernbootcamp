@@ -2,14 +2,14 @@ import React, { useState, useEffect } from "react";
 import Base from "../core/Base";
 import { Link } from "react-router-dom";
 import {
-  getAllCategories,
+  getCategories,
   getProduct,
   updateProduct,
 } from "./helper/adminapicall";
-import { isAutheticated } from "../auth/helper/index";
+import { isAuthenticated } from "../auth/helper";
 
 const UpdateProduct = ({ match }) => {
-  const { user, token } = isAutheticated();
+  const { user, token } = isAuthenticated();
 
   const [values, setValues] = useState({
     name: "",
@@ -32,38 +32,53 @@ const UpdateProduct = ({ match }) => {
     price,
     stock,
     categories,
+    category,
+    loading,
+    error,
     createdProduct,
+    getaRedirect,
     formData,
   } = values;
 
-  const preload = (productId) => {
-    getProduct(productId).then((data) => {
+  const [saveCategory, setSaveCategory] = useState({
+    sCategory: "",
+  });
+  const { sCategory } = saveCategory;
+
+  const preloadCategories = () => {
+    getCategories().then((data) => {
+      console.log("preloadCategories :", data);
       if (data.error) {
         setValues({ ...values, error: data.error });
       } else {
-        preloadCategories();
         setValues({
           ...values,
-          name: data.name,
-          description: data.description,
-          price: data.price,
-          category: data.category,
-          stock: data.stock,
+          categories: data,
           formData: new FormData(),
         });
       }
     });
   };
 
-  const preloadCategories = () => {
-    getAllCategories().then((data) => {
+  const preload = (productId) => {
+    getProduct(productId).then((data) => {
+      // console.log(data);
       if (data.error) {
         setValues({ ...values, error: data.error });
       } else {
+        console.log("Prelod Data: ", data.category._id);
+        preloadCategories();
         setValues({
-          categories: data,
+          ...values,
+          name: data.name,
+          description: data.description,
+          price: data.price,
+          category: data.category._id,
+          stock: data.stock,
           formData: new FormData(),
         });
+
+        setSaveCategory({ ...saveCategory, sCategory: data.category._id });
       }
     });
   };
@@ -72,7 +87,6 @@ const UpdateProduct = ({ match }) => {
     preload(match.params.productId);
   }, []);
 
-  //TODO: work on it
   const onSubmit = (event) => {
     event.preventDefault();
     setValues({ ...values, error: "", loading: true });
@@ -80,7 +94,7 @@ const UpdateProduct = ({ match }) => {
     updateProduct(match.params.productId, user._id, token, formData).then(
       (data) => {
         if (data.error) {
-          setValues({ ...values, error: data.error });
+          setValues({ ...values, error: data.errors });
         } else {
           setValues({
             ...values,
@@ -108,15 +122,14 @@ const UpdateProduct = ({ match }) => {
       className="alert alert-success mt-3"
       style={{ display: createdProduct ? "" : "none" }}
     >
-      <h4>{createdProduct} updated successfully</h4>
+      <h4>{createdProduct} Updated successfully</h4>
     </div>
   );
-
   const createProductForm = () => (
     <form>
       <span>Post photo</span>
       <div className="form-group">
-        <label className="btn btn-block btn-success">
+        <label className="btn btn-block bg_gradiant_btn">
           <input
             onChange={handleChange("photo")}
             type="file"
@@ -128,8 +141,8 @@ const UpdateProduct = ({ match }) => {
       </div>
       <div className="form-group">
         <input
+          type="text"
           onChange={handleChange("name")}
-          name="photo"
           className="form-control"
           placeholder="Name"
           value={name}
@@ -138,7 +151,6 @@ const UpdateProduct = ({ match }) => {
       <div className="form-group">
         <textarea
           onChange={handleChange("description")}
-          name="photo"
           className="form-control"
           placeholder="Description"
           value={description}
@@ -154,10 +166,12 @@ const UpdateProduct = ({ match }) => {
         />
       </div>
       <div className="form-group">
+        {console.log("REACHED saveCategory: ", sCategory)}
         <select
           onChange={handleChange("category")}
           className="form-control"
           placeholder="Category"
+          value={sCategory}
         >
           <option>Select</option>
           {categories &&
@@ -170,8 +184,8 @@ const UpdateProduct = ({ match }) => {
       </div>
       <div className="form-group">
         <input
-          onChange={handleChange("stock")}
           type="number"
+          onChange={handleChange("stock")}
           className="form-control"
           placeholder="Stock"
           value={stock}
@@ -185,18 +199,29 @@ const UpdateProduct = ({ match }) => {
       >
         Update Product
       </button>
-      <Link to="/admin/dashboard" className="btn btn-outline-warning mx-4 mb-3">
-        Admin Home
-      </Link>
     </form>
   );
 
   return (
-    <Base title="Update a product here!">
-      <div className="row bg-dark text-white rounded">
-        <div className="col-md-8 offset-md-2">
-          {successMessage()}
-          {createProductForm()}
+    <Base
+      title="Add a product here!"
+      description="Welcome to product creation section"
+      className="container pb-5"
+    >
+      <div className="box_shadow bg-white">
+        <div className="card_title px-4">
+          <Link
+            to="/admin/dashboard"
+            className="btn btn-md bg_gradiant_btn my-3"
+          >
+            Admin Home
+          </Link>
+        </div>
+        <div className="row rounded">
+          <div className="col-md-8 offset-md-2 p-4">
+            {successMessage()}
+            {createProductForm()}
+          </div>
         </div>
       </div>
     </Base>
