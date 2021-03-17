@@ -3,6 +3,7 @@ import "../styles.css";
 import { API } from "../backend";
 import Base from "./Base";
 import { getProducts } from "./helper/coreapicalls";
+import Card from "./card";
 
 export default function Home() {
   const [products, setProducts] = useState([]);
@@ -25,15 +26,15 @@ export default function Home() {
   console.log("API IS", API);
   return (
     <Base title="Home" description="Welcome to the Tshirt Shop">
-      {/* <h1 className="text-center">All of the tshirts</h1> */}
+      <h1 className="text-center">All of the tshirts</h1>
       <div className="row text-center py-3">
-        {/* {products.map((product, index) => {
+        {products.map((product, index) => {
           return (
             <div key={index} className="col-4 mb-4">
               <Card product={product} />
             </div>
           );
-        })} */}
+        })}
       </div>
     </Base>
   );
